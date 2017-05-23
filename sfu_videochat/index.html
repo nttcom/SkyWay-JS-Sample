@@ -1,158 +1,158 @@
 <html>
 <head>
-    <meta charset="utf-8">
-    <title>SkyWay - Video chat example</title>
-    <link rel="stylesheet" href="style.css">
-    <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.8/jquery.min.js"></script>
-    <script src="//webrtc.github.io/adapter/adapter-3.1.3.js"></script>
-    <script type="text/javascript" src="https://cdn.skyway.io/skyway.js"></script>
-    <script>
-        // Compatibility shim
-        navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
-        // Peer object
-        var peer = new Peer({
-            key: '4050f535-fc75-468e-82f8-a4d5c16cf7bf',
-            debug: 3
-        });
-        var room;
-        peer.on('open', function () {
-            $('#my-id').text(peer.id);
+  <meta charset="utf-8">
+  <title>SkyWay - Video chat example</title>
+  <link rel="stylesheet" href="style.css">
+  <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.8/jquery.min.js"></script>
+  <script src="//webrtc.github.io/adapter/adapter-3.1.3.js"></script>
+  <script type="text/javascript" src="https://cdn.skyway.io/skyway.js"></script>
+  <script>
+    // Compatibility shim
+    navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+    // Peer object
+    var peer = new Peer({
+      key: 'yourkey0-a515-486b-8488-407b41150e43',
+      debug: 3
+    });
+    var room;
+    peer.on('open', function(){
+      $('#my-id').text(peer.id);
 
-            // Get things started
-            step1();
-        });
-        peer.on('error', function (err) {
-            alert(err.message);
-            // Return to step 2 if error occurs
-            step2();
-        });
-        // Click handlers setup
-        $(function () {
-            $('#make-call').submit(function (e) {
-                e.preventDefault();
-                // Initiate a call!
-                var roomName = $('#join-room').val();
-                if (!roomName) {
-                    return;
-                }
-                room = peer.joinRoom('sfu_video_' + roomName, {mode: 'sfu', stream: window.localStream});
-
-                $('#room-id').text(roomName);
-                step3(room);
-            });
-            $('#end-call').click(function () {
-                room.close();
-                step2();
-            });
-            // Retry if getUserMedia fails
-            $('#step1-retry').click(function () {
-                $('#step1-error').hide();
-                step1();
-            });
-            step0();
-        });
-        function step0() {
-            // set up audio and video input selectors
-            var audioSelect = $('#audioSource');
-            var videoSelect = $('#videoSource');
-            var selectors = [audioSelect, videoSelect];
-
-            navigator.mediaDevices.enumerateDevices()
-                .then(function (deviceInfos) {
-                    var values = selectors.map(function (select) {
-                        return select.val() || '';
-                    });
-                    selectors.forEach(function (select) {
-                        const children = select.children(':first');
-                        while (children.length) {
-                            select.remove(children);
-                        }
-                    });
-
-                    for (var i = 0; i !== deviceInfos.length; ++i) {
-                        var deviceInfo = deviceInfos[i];
-                        var option = $('<option>');
-                        option.val(deviceInfo.deviceId);
-                        if (deviceInfo.kind === 'audioinput') {
-                            option.text(deviceInfo.label ||
-                                'Microphone ' + (audioSelect.children().length + 1));
-                            audioSelect.append(option);
-                        } else if (deviceInfo.kind === 'videoinput') {
-                            option.text(deviceInfo.label || 'Camera ' +
-                                (videoSelect.children().length + 1));
-                            videoSelect.append(option);
-                        }
-                    }
-                    selectors.forEach(function (select, selectorIndex) {
-                        if (Array.prototype.slice.call(select.children()).some(function (n) {
-                                return n.value === values[selectorIndex];
-                            })) {
-                            select.val(values[selectorIndex]);
-                        }
-                    });
-
-                    videoSelect.on('change', step1);
-                    audioSelect.on('change', step1);
-
-                    step1();
-                });
+      // Get things started
+      step1();
+    });
+    peer.on('error', function(err){
+      alert(err.message);
+      // Return to step 2 if error occurs
+      step2();
+    });
+    // Click handlers setup
+    $(function(){
+      $('#make-call').submit(function(e){
+        e.preventDefault();
+        // Initiate a call!
+        var roomName = $('#join-room').val();
+        if (!roomName) {
+          return;
         }
-        function step1() {
-            // Get audio/video stream
-            var audioSource = $('#audioSource').val();
-            var videoSource = $('#videoSource').val();
-            var constraints = {
-                audio: {deviceId: audioSource ? {exact: audioSource} : undefined},
-                video: {deviceId: videoSource ? {exact: videoSource} : undefined}
-            };
-            navigator.mediaDevices.getUserMedia(constraints).then(function (stream) {
-                // Set your video displays. Don't use srcObject because it can sometimes corrupt the mediaStream in Chrome 56+.
-                $('#my-video').get(0).src = URL.createObjectURL(stream);
-                window.localStream = stream;
+        room = peer.joinRoom('sfu_video_' + roomName, {mode: 'sfu', stream: window.localStream});
 
-                if (room) {
-                    room.replaceStream(stream);
-                    return;
-                }
+        $('#room-id').text(roomName);
+        step3(room);
+      });
+      $('#end-call').click(function(){
+        room.close();
+        step2();
+      });
+      // Retry if getUserMedia fails
+      $('#step1-retry').click(function(){
+        $('#step1-error').hide();
+        step1();
+      });
+      step0();
+    });
+    function step0 () {
+      // set up audio and video input selectors
+      var audioSelect = $('#audioSource');
+      var videoSelect = $('#videoSource');
+      var selectors = [audioSelect, videoSelect];
 
-                step2();
-            }, function (err) {
-                $('#step1-error').show();
-                console.error(err);
-            });
+      navigator.mediaDevices.enumerateDevices()
+        .then(function(deviceInfos) {
+          var values = selectors.map(function(select) {
+            return select.val() || '';
+          });
+          selectors.forEach(function(select) {
+            const children = select.children(':first');
+            while (children.length) {
+              select.remove(children);
+            }
+          });
+
+          for (var i = 0; i !== deviceInfos.length; ++i) {
+            var deviceInfo = deviceInfos[i];
+            var option = $('<option>');
+            option.val(deviceInfo.deviceId);
+            if (deviceInfo.kind === 'audioinput') {
+              option.text(deviceInfo.label ||
+                'Microphone ' + (audioSelect.children().length + 1));
+              audioSelect.append(option);
+            } else if (deviceInfo.kind === 'videoinput') {
+              option.text(deviceInfo.label || 'Camera ' +
+                (videoSelect.children().length + 1));
+              videoSelect.append(option);
+            }
+          }
+          selectors.forEach(function(select, selectorIndex) {
+            if (Array.prototype.slice.call(select.children()).some(function(n) {
+                return n.value === values[selectorIndex];
+              })) {
+              select.val(values[selectorIndex]);
+            }
+          });
+
+          videoSelect.on('change', step1);
+          audioSelect.on('change', step1);
+
+          step1();
+        });
+    }
+    function step1 () {
+      // Get audio/video stream
+      var audioSource = $('#audioSource').val();
+      var videoSource = $('#videoSource').val();
+      var constraints = {
+        audio: {deviceId: audioSource ? {exact: audioSource} : undefined},
+        video: {deviceId: videoSource ? {exact: videoSource} : undefined}
+      };
+      navigator.mediaDevices.getUserMedia(constraints).then(function(stream) {
+        // Set your video displays. Don't use srcObject because it can sometimes corrupt the mediaStream in Chrome 56+.
+        $('#my-video').get(0).src = URL.createObjectURL(stream);
+        window.localStream = stream;
+
+        if (room) {
+          room.replaceStream(stream);
+          return;
         }
-        function step2() {
-            $('#step1, #step3').hide();
-            $('#step2').show();
-            $('#join-room').focus();
-        }
-        function step3(room) {
-            // Wait for stream on the call, then set peer video display
-            room.on('stream', function (stream) {
-                const peerId = stream.peerId;
 
-                $('#their-videos').append($(
-                    '<div class="video_' + peerId + '" id="video_' + peerId + '_' + stream.id.replace('{', '').replace('}', '') + '">' +
-                    '<label>' + stream.peerId + ':' + stream.id + '</label>' +
-                    '<video autoplay class="remoteVideos">' +
-                    '</div>'));
-                $('#video_' + peerId + '_' + stream.id.replace('{', '').replace('}', '')).find("video").get(0).srcObject = stream;
-            });
+        step2();
+      }, function(err){
+        $('#step1-error').show();
+        console.error(err);
+      });
+    }
+    function step2 () {
+      $('#step1, #step3').hide();
+      $('#step2').show();
+      $('#join-room').focus();
+    }
+    function step3 (room) {
+      // Wait for stream on the call, then set peer video display
+      room.on('stream', function(stream){
+        const peerId = stream.peerId;
 
-            room.on('removeStream', function (stream) {
-                const peerId = stream.peerId;
-                $('#video_' + peerId + '_' + stream.id.replace('{', '').replace('}', '')).remove();
-            });
+        $('#their-videos').append($(
+          '<div class="video_' + peerId +'" id="video_' + peerId + '_' + stream.id.replace('{', '').replace('}', '') + '">' +
+            '<label>' + stream.peerId + ':' + stream.id + '</label>' +
+            '<video autoplay class="remoteVideos">' +
+          '</div>'));
+        $('#video_' + peerId + '_' + stream.id.replace('{', '').replace('}', '')).find("video").get(0).srcObject = stream;
+      });
 
-            // UI stuff
-            room.on('close', step2);
-            room.on('peerLeave', function (peerId) {
-                $('.video_' + peerId).remove();
-            });
-            $('#step1, #step2').hide();
-            $('#step3').show();
-        }
-    </script>
+      room.on('removeStream', function(stream) {
+        const peerId = stream.peerId;
+        $('#video_' + peerId + '_' + stream.id.replace('{', '').replace('}', '')).remove();
+      });
+
+      // UI stuff
+      room.on('close', step2);
+      room.on('peerLeave', function(peerId){
+        $('.video_' + peerId).remove();
+      });
+      $('#step1, #step2').hide();
+      $('#step3').show();
+    }
+  </script>
 
 
 </head>
@@ -161,56 +161,54 @@
 
 <div class="pure-g">
 
-    <!-- Video area -->
-    <div class="pure-u-2-3" id="video-container">
-        <div id="their-videos"></div>
-        <div>
-            <label id="my-label"></label>
-            <video id="my-video" muted="true" autoplay></video>
-        </div>
+  <!-- Video area -->
+  <div class="pure-u-2-3" id="video-container">
+    <div id="their-videos"></div>
+    <div>
+      <label id="my-label"></label>
+      <video id="my-video" muted="true" autoplay></video>
+    </div>
+  </div>
+
+  <!-- Steps -->
+  <div class="pure-u-1-3">
+    <h2>SkyWay Video Chat</h2>
+
+    <div class="select">
+      <label for="audioSource">Audio input source: </label><select id="audioSource"></select>
     </div>
 
-    <!-- Steps -->
-    <div class="pure-u-1-3">
-        <h2>SkyWay Video Chat</h2>
-
-        <div class="select">
-            <label for="audioSource">Audio input source: </label><select id="audioSource"></select>
-        </div>
-
-        <div class="select">
-            <label for="videoSource">Video source: </label><select id="videoSource"></select>
-        </div>
-
-        <!-- Get local audio/video stream -->
-        <div id="step1">
-            <p>Please click `allow` on the top of the screen so we can access your webcam and microphone for calls.</p>
-            <div id="step1-error">
-                <p>Failed to access the webcam and microphone. Make sure to run this demo on an http server and click
-                    allow when asked for permission by the browser.</p>
-                <a href="#" class="pure-button pure-button-error" id="step1-retry">Try again</a>
-            </div>
-        </div>
-
-        <!-- Make calls to others -->
-        <div id="step2">
-            <h3>Make a call</h3>
-            <form id="make-call" class="pure-form">
-                <input type="text" placeholder="Join room..." id="join-room">
-                <button class="pure-button pure-button-success" type="submit">Join</button>
-            </form>
-            <p><strong>Warning:</strong> You may connect with people you don't know if you both use the same room name.
-            </p>
-            <p><strong>注意：</strong>同じルーム名を使用した場合、知らない人と接続する可能性があります。</p>
-        </div>
-        <p>Your id: <span id="my-id">...</span></p>
-
-        <!-- Call in progress -->
-        <div id="step3">
-            <p>Currently in room <span id="room-id">...</span></p>
-            <p><a href="#" class="pure-button pure-button-error" id="end-call">End call</a></p>
-        </div>
+    <div class="select">
+      <label for="videoSource">Video source: </label><select id="videoSource"></select>
     </div>
+
+    <!-- Get local audio/video stream -->
+    <div id="step1">
+      <p>Please click `allow` on the top of the screen so we can access your webcam and microphone for calls.</p>
+      <div id="step1-error">
+        <p>Failed to access the webcam and microphone. Make sure to run this demo on an http server and click allow when asked for permission by the browser.</p>
+        <a href="#" class="pure-button pure-button-error" id="step1-retry">Try again</a>
+      </div>
+    </div>
+
+    <!-- Make calls to others -->
+    <div id="step2">
+      <h3>Make a call</h3>
+      <form id="make-call" class="pure-form">
+        <input type="text" placeholder="Join room..." id="join-room">
+        <button class="pure-button pure-button-success" type="submit">Join</button>
+      </form>
+      <p><strong>Warning:</strong> You may connect with people you don't know if you both use the same room name.</p>
+      <p><strong>注意：</strong>同じルーム名を使用した場合、知らない人と接続する可能性があります。</p>
+    </div>
+    <p>Your id: <span id="my-id">...</span></p>
+
+    <!-- Call in progress -->
+    <div id="step3">
+      <p>Currently in room <span id="room-id">...</span></p>
+      <p><a href="#" class="pure-button pure-button-error" id="end-call">End call</a></p>
+    </div>
+  </div>
 </div>
 
 
